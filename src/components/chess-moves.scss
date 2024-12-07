@@ -1,0 +1,9 @@
+.chess-moves {
+  overflow-y: auto;
+  height: 100%;
+  summary {
+    position: sticky;
+    top: 0;
+    background-color: white;
+  }
+}
