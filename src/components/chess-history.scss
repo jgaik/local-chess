@@ -2,6 +2,7 @@
   max-height: 100%;
   display: grid;
   grid-template-columns: repeat(3, max-content);
-  gap: 0.25rem;
+  column-gap: var(--yamori-spacing-medium);
+  row-gap: var(--yamori-spacing-x-small);
   overflow-y: auto;
 }

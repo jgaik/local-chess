@@ -2,8 +2,9 @@
   overflow-y: auto;
   height: 100%;
   summary {
+    cursor: pointer;
     position: sticky;
     top: 0;
-    background-color: white;
+    background-color: var(--yamori-surface-page);
   }
 }
