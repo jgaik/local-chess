@@ -11,21 +11,17 @@ import {
   ChessGameState,
   ChessMove,
   ChessSquareString,
-  PROMOTION_PIECES,
 } from "../chess-game-service";
 import { ChessGameContextValue, ChessGameContext } from "../contexts";
-import {
-  assertNonNullable,
-  getNonNullable,
-} from "@yamori-shared/react-utilities";
+import { assertNonNullable } from "@yamori-shared/react-utilities";
+import { ChessPromotionDialog } from "./chess-promotion-dialog";
 
 const chessGame = new ChessGame();
 
 export const ChessGameProvider: React.FC<PropsWithChildren> = ({
   children,
 }) => {
-  const dialogRef = useRef<ElementRef<"dialog">>(null);
-  const dialogContentRef = useRef<ElementRef<"div">>(null);
+  const dialogRef = useRef<ElementRef<typeof ChessPromotionDialog>>(null);
   const promotionPromiseResolve =
     useRef<(value: ChessMove["promotion"]) => void>();
   const [gameState, setGameState] = useState<ChessGameState>(
@@ -47,6 +43,7 @@ export const ChessGameProvider: React.FC<PropsWithChildren> = ({
 
   const showPromotionDialog = useCallback(() => {
     dialogRef.current?.showModal();
+
     return new Promise<ChessMove["promotion"]>((resolve) => {
       promotionPromiseResolve.current = resolve;
     }).finally(() => {
@@ -69,33 +66,23 @@ export const ChessGameProvider: React.FC<PropsWithChildren> = ({
           "selectedSquare on active square click"
         );
 
-        const moves = getNonNullable(
-          gameState.availableMoves[selectedSquare]?.filter(
-            (availableMove) =>
-              availableMove.destinationSquare === destinationSquare
-          ),
-          "moves in available moves on active square click"
+        const moves = gameState.availableMoves[selectedSquare]?.filter(
+          (availableMove) =>
+            availableMove.destinationSquare === destinationSquare
         );
 
-        new Promise<ChessMove>((resolve, reject) => {
-          if (moves.length === 1) {
-            resolve(moves[0]);
-          } else {
-            showPromotionDialog().then((promotion) => {
-              if (promotion)
-                resolve(
-                  getNonNullable(
-                    moves.find((move) => move.promotion === promotion),
-                    "promotion move"
-                  )
-                );
-              else {
-                reject();
-              }
-            });
-          }
-        })
-          .then((move) => setGameState(chessGame.makeMove(move)))
+        Promise.resolve(
+          moves?.length === 1
+            ? moves[0]
+            : showPromotionDialog().then((promotion) =>
+                promotion
+                  ? moves?.find((move) => move.promotion === promotion)
+                  : undefined
+              )
+        )
+          .then((move) => {
+            if (move) setGameState(chessGame.makeMove(move));
+          })
           .finally(() => setSelectedSquare(null));
       },
       setSelectedSquare: setSelectedSquare,
@@ -106,26 +93,13 @@ export const ChessGameProvider: React.FC<PropsWithChildren> = ({
   return (
     <ChessGameContext.Provider value={chessGameContextValue}>
       {children}
-      <dialog
+      <ChessPromotionDialog
+        activePlayer={gameState.activePlayer}
+        onPromotion={(promotion) =>
+          promotionPromiseResolve.current?.(promotion)
+        }
         ref={dialogRef}
-        onClose={() => promotionPromiseResolve.current?.(undefined)}
-        onClick={(event) => {
-          if (!dialogContentRef.current?.contains(event.target as Node)) {
-            dialogRef.current?.close();
-          }
-        }}
-      >
-        <div ref={dialogContentRef}>
-          {PROMOTION_PIECES.map((promotionPiece) => (
-            <button
-              onClick={() => promotionPromiseResolve.current?.(promotionPiece)}
-              key={promotionPiece}
-            >
-              {promotionPiece}
-            </button>
-          ))}
-        </div>
-      </dialog>
+      />
     </ChessGameContext.Provider>
   );
 };

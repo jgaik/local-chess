@@ -1,23 +1,14 @@
-import React, {
-  ComponentPropsWithoutRef,
-  ElementRef,
-  memo,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useMemo, useState } from "react";
 import "./chessboard.scss";
 import {
   CHESSBOARD_FILES,
   CHESSBOARD_RANKS,
   ChessGame,
-  ChessPlayer,
   ChessSquareString,
-  ChessSquareValue,
 } from "../chess-game-service";
 import { useChessGame } from "../contexts";
-import { BemClassNamesCreator, Nullable } from "@yamori-shared/react-utilities";
+import { BemClassNamesCreator } from "@yamori-shared/react-utilities";
+import { ChessSquare } from "./chess-square";
 
 const CHESSBOARD_SQUARES = new Array(64)
   .fill(null)
@@ -27,72 +18,6 @@ const CHESSBOARD_SQUARES = new Array(64)
         8 - Math.floor(index / 8)
       }` as ChessSquareString
   );
-
-const ChessboardSquareButton: React.FC<
-  {
-    color: ChessPlayer | undefined;
-    value: Nullable<ChessSquareValue>;
-    isActive: ChessPlayer | undefined;
-    isSelected: boolean;
-  } & Omit<ComponentPropsWithoutRef<"button">, "value" | "style">
-> = memo(function ({ color, value, isActive, isSelected, ...buttonProps }) {
-  const buttonRef = useRef<ElementRef<"button">>(null);
-  const buttonContentRef = useRef<ElementRef<"div">>(null);
-
-  const bemClassNames = useMemo(
-    () =>
-      BemClassNamesCreator.create(
-        ["chessboard-square-button", { selected: isSelected }],
-        undefined,
-        ["content", { active: isActive }]
-      ),
-    [isActive, isSelected]
-  );
-
-  useLayoutEffect(() => {
-    if (!buttonRef.current || !buttonContentRef.current) return;
-
-    const buttonNode = buttonRef.current;
-    const buttonContentNode = buttonContentRef.current;
-
-    const resizeObserver = new ResizeObserver(([entry]) => {
-      const blockSize = entry.borderBoxSize[0].blockSize;
-
-      buttonNode.style.fontSize = `${Math.floor(blockSize / 2)}px`;
-      buttonContentNode.style.borderWidth = `${Math.max(
-        Math.floor(blockSize / 20),
-        1
-      )}px`;
-    });
-
-    resizeObserver.observe(buttonRef.current);
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, []);
-
-  return (
-    <button
-      ref={buttonRef}
-      className={bemClassNames["chessboard-square-button"]}
-      style={{
-        color,
-      }}
-      {...buttonProps}
-    >
-      <div
-        ref={buttonContentRef}
-        className={bemClassNames["content"]}
-        style={{
-          borderColor: isActive,
-        }}
-      >
-        {value?.toUpperCase()}
-      </div>
-    </button>
-  );
-});
 
 const ChessboardSquare: React.FC<{ squareString: ChessSquareString }> = ({
   squareString,
@@ -115,7 +40,7 @@ const ChessboardSquare: React.FC<{ squareString: ChessSquareString }> = ({
   const disabled = !isActive && (!value || activePlayer !== player);
 
   return (
-    <ChessboardSquareButton
+    <ChessSquare
       color={player}
       aria-disabled={disabled}
       value={value}
@@ -130,6 +55,7 @@ const ChessboardSquare: React.FC<{ squareString: ChessSquareString }> = ({
         else setSelectedSquare(squareString);
       }}
       id={squareString}
+      observeSize
     />
   );
 };
@@ -137,13 +63,17 @@ const ChessboardSquare: React.FC<{ squareString: ChessSquareString }> = ({
 export const Chessboard: React.FC = () => {
   const [flipped, setFlipped] = useState(false);
 
-  const bemClassNames = BemClassNamesCreator.create(
-    "chessboard",
-    undefined,
-    "switch",
-    "files",
-    ["ranks", { flipped }],
-    "squares"
+  const bemClassNames = useMemo(
+    () =>
+      BemClassNamesCreator.create(
+        "chessboard",
+        undefined,
+        "switch",
+        "files",
+        ["ranks", { flipped }],
+        "squares"
+      ),
+    [flipped]
   );
 
   const squares = useMemo(

@@ -1,3 +1,4 @@
+import { Button } from "@yamori-design/react-components";
 import { useChessGame } from "../contexts";
 import "./chess-moves.scss";
 
@@ -12,13 +13,17 @@ export const ChessMoves: React.FC = () => {
           .flat()
           .map((move) => (
             <li key={move.notation}>
-              <button
+              <Button
                 onMouseEnter={() => onMoveHover(move)}
                 onMouseLeave={() => onMoveHover(null)}
-                onClick={() => onMoveClick(move)}
+                onClick={() => {
+                  onMoveClick(move);
+                  onMoveHover(null);
+                }}
+                variant="text"
               >
                 {move.notation}
-              </button>
+              </Button>
             </li>
           ))}
       </ul>

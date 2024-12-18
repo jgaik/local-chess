@@ -185,7 +185,6 @@ export class ChessGame {
 
   public makeMove(move: ChessMove) {
     this.updateCastlingStatus(move);
-    console.log(move);
 
     const nextPosition = this.getNextPosition(move);
 

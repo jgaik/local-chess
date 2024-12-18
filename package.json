@@ -10,7 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@yamori-design/styles": "^0.6.0",
+    "@yamori-design/react-components": "^1.1.0",
+    "@yamori-design/styles": "^1.1.0",
     "@yamori-shared/react-utilities": "^1.1.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

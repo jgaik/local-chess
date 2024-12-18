@@ -1,0 +1,7 @@
+.chess-promotion-dialog {
+  &__content {
+    .chess-square {
+      width: var(--chess-square-size);
+    }
+  }
+}
