@@ -1,10 +1,16 @@
 .chess-moves {
-  overflow-y: auto;
   height: 100%;
+  overflow-y: auto;
+
   summary {
+    background-color: var(--yamori-surface-page);
     cursor: pointer;
     position: sticky;
-    top: 0;
-    background-color: var(--yamori-surface-page);
+    top: -2px;
+  }
+
+  ul {
+    margin: 0;
+    padding: 0 var(--yamori-spacing-large);
   }
 }

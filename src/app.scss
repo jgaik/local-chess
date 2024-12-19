@@ -4,17 +4,31 @@
   width: 100%;
   padding: var(--yamori-spacing-large);
   display: flex;
-  flex-direction: column;
   gap: var(--yamori-spacing-large);
 
   &__controls {
     align-items: flex-start;
-    min-height: 0;
     display: flex;
+    flex: 1;
     gap: var(--yamori-spacing-large);
+    min-height: 0;
+    min-width: 0;
 
     > * {
       flex: 1;
+      min-width: 0;
     }
+  }
+}
+
+@media (min-aspect-ratio: 1 / 1) {
+  .app {
+    flex-direction: row;
+  }
+}
+
+@media (max-aspect-ratio: 1 / 1) {
+  .app {
+    flex-direction: column;
   }
 }

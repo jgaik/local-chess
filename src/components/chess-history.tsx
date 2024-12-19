@@ -9,6 +9,14 @@ type Move = {
   black?: string;
 };
 
+const ChessHistoryMove: React.FC<Move> = (move) => (
+  <Fragment>
+    <span>{move.index}.</span>
+    <span>{move.white}</span>
+    <span>{move.black}</span>
+  </Fragment>
+);
+
 export const ChessHistory: React.FC = () => {
   const { moves } = useChessGame();
 
@@ -33,11 +41,7 @@ export const ChessHistory: React.FC = () => {
   return (
     <div className="chess-history">
       {movesList.map((move) => (
-        <Fragment key={move.index}>
-          <span>{move.index}.</span>
-          <span>{move.white}</span>
-          <span>{move.black}</span>
-        </Fragment>
+        <ChessHistoryMove key={move.index} {...move} />
       ))}
     </div>
   );

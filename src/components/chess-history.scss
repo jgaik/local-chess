@@ -1,8 +1,9 @@
 .chess-history {
-  max-height: 100%;
+  column-gap: var(--yamori-spacing-medium);
   display: grid;
   grid-template-columns: repeat(3, max-content);
-  column-gap: var(--yamori-spacing-medium);
-  row-gap: var(--yamori-spacing-x-small);
+  list-style: none;
+  max-height: 100%;
   overflow-y: auto;
+  row-gap: var(--yamori-spacing-x-small);
 }
