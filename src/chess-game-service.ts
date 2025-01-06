@@ -1,4 +1,5 @@
 import {
+  assertNonNullable,
   getNonNullable,
   getTypedObjectEntries,
   nilFilter,
@@ -55,8 +56,14 @@ export type ChessPosition = Partial<
 export type ChessGameState = {
   activePlayer: ChessPlayer;
   availableMoves: Partial<Record<ChessSquareString, ChessMove[]>>;
-  currentPosition: ChessPosition;
-  moves: ChessMove[];
+  position: ChessPosition;
+  moves: string[];
+};
+
+export type SavedChessGameState = {
+  position: ChessPosition;
+  moves: string[];
+  lastMove: ChessMove;
 };
 
 const STARTING_POSITION: ChessPosition = {
@@ -174,29 +181,41 @@ export class ChessGame {
     return squareValue === squareValue.toLowerCase() ? "black" : "white";
   }
 
+  constructor(savedGameState?: SavedChessGameState) {
+    if (savedGameState) {
+      this.position = savedGameState.position;
+      this.lastMove = savedGameState.lastMove;
+      this.moveNotations = savedGameState.moves;
+    }
+  }
+
   public get gameState(): ChessGameState {
     return {
       activePlayer: this.activePlayer,
-      currentPosition: this.currentPosition,
+      position: this.position,
       availableMoves: this.availableMoves,
-      moves: this.moves,
+      moves: this.moveNotations,
     };
   }
 
   public makeMove(move: ChessMove) {
+    assertNonNullable(move.notation, "move notation when making a move");
     this.updateCastlingStatus(move);
 
     const nextPosition = this.getNextPosition(move);
 
-    this.positions.push(nextPosition);
-    this.moves.push(move);
+    this.position = nextPosition;
+    this.lastMove = move;
+    this.moveNotations.push(move.notation);
 
     return this.gameState;
   }
 
-  private positions: Array<ChessPosition> = [STARTING_POSITION];
+  private position: ChessPosition = STARTING_POSITION;
 
-  private moves: Array<ChessMove> = [];
+  private lastMove: ChessMove | null = null;
+
+  private moveNotations: Array<string> = [];
 
   private castlingStatus: Record<ChessPlayer, ChessCastlingStatus> = {
     white: true,
@@ -204,29 +223,29 @@ export class ChessGame {
   };
 
   private get activePlayer(): ChessPlayer {
-    return this.moves.length % 2 === 0 ? "white" : "black";
+    return this.moveNotations.length % 2 === 0 ? "white" : "black";
   }
 
   private get inactivePlayer(): ChessPlayer {
-    return this.moves.length % 2 === 0 ? "black" : "white";
+    return this.moveNotations.length % 2 === 0 ? "black" : "white";
   }
 
   private get availableMoves(): Partial<
     Record<ChessSquareString, ChessMove[]>
   > {
     const pieceSquareGetters = this.getPieceDestinationSquaresGetters(
-      this.currentPosition
+      this.position
     );
 
     const notationMap: Record<string, ChessMove[]> = {};
 
-    const movesMap = getTypedObjectEntries(this.currentPosition).reduce<
+    const movesMap = getTypedObjectEntries(this.position).reduce<
       Partial<Record<ChessSquareString, ChessMove[]>>
     >((acc, [startingSquare, squareValue]) => {
       const newAcc = { ...acc };
       if (ChessGame.getSquareValuePlayer(squareValue) === this.activePlayer) {
         const piece = getNonNullable(
-          this.currentPosition[startingSquare],
+          this.position[startingSquare],
           "squareValue"
         ).toUpperCase() as ChessPiece;
 
@@ -247,7 +266,7 @@ export class ChessGame {
           const isCapture = (destinationSquare: ChessSquare) => {
             const hasCaptured =
               ChessGame.getSquareValuePlayer(
-                this.currentPosition[destinationSquare.toString()]
+                this.position[destinationSquare.toString()]
               ) === this.inactivePlayer;
 
             if (piece === "P" && !hasCaptured) {
@@ -288,14 +307,13 @@ export class ChessGame {
 
                   return (
                     shifted &&
-                    this.currentPosition[shifted.toString()] ===
-                      opponentKingValue
+                    this.position[shifted.toString()] === opponentKingValue
                   );
                 });
               }
               case "N": {
                 return pieceSquareGetters[pieceToCheck](destinationSquare).some(
-                  (square) => this.currentPosition[square] === opponentKingValue
+                  (square) => this.position[square] === opponentKingValue
                 );
               }
               case "Q":
@@ -303,7 +321,7 @@ export class ChessGame {
               case "B": {
                 return PIECE_DIRECTIONS[pieceToCheck].some((direction) =>
                   this.traversePosition(
-                    this.currentPosition,
+                    this.position,
                     destinationSquare,
                     direction,
                     (_, squareValue) => [
@@ -406,16 +424,8 @@ export class ChessGame {
     return movesMap;
   }
 
-  private get currentPosition() {
-    return getNonNullable(this.positions.at(-1), "currentPosition");
-  }
-
-  private get lastMove() {
-    return this.moves.at(-1);
-  }
-
   private getNextPosition(move: ChessMove): ChessPosition {
-    const nextPosition = { ...this.currentPosition };
+    const nextPosition = { ...this.position };
 
     switch (move.piece) {
       case "P": {

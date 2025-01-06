@@ -6,17 +6,18 @@
   gap: var(--yamori-spacing-large);
 
   &__controls {
-    align-items: flex-start;
-    display: flex;
+    align-items: start;
+    display: grid;
     flex: 1;
     gap: var(--yamori-spacing-large);
     min-height: 0;
     min-width: 0;
+    grid-template-rows: 1fr auto;
+    grid-template-columns: 1fr 1fr;
+  }
 
-    > * {
-      flex: 1;
-      min-width: 0;
-    }
+  &__button {
+    grid-column-start: span 2;
   }
 }
 

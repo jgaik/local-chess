@@ -1,5 +1,5 @@
 import {
-  ElementRef,
+  ComponentRef,
   PropsWithChildren,
   useCallback,
   useMemo,
@@ -16,14 +16,15 @@ import { ChessGameContextValue, ChessGameContext } from "../contexts";
 import { assertNonNullable } from "@yamori-shared/react-utilities";
 import { ChessPromotionDialog } from "./chess-promotion-dialog";
 
-const chessGame = new ChessGame();
-
 export const ChessGameProvider: React.FC<PropsWithChildren> = ({
   children,
 }) => {
-  const dialogRef = useRef<ElementRef<typeof ChessPromotionDialog>>(null);
+  const chessGame = useMemo(() => new ChessGame(), []);
+
+  const dialogRef = useRef<ComponentRef<typeof ChessPromotionDialog>>(null);
   const promotionPromiseResolve =
-    useRef<(value: ChessMove["promotion"]) => void>();
+    useRef<(value: ChessMove["promotion"]) => void>(undefined);
+
   const [gameState, setGameState] = useState<ChessGameState>(
     () => chessGame.gameState
   );
@@ -85,9 +86,16 @@ export const ChessGameProvider: React.FC<PropsWithChildren> = ({
           })
           .finally(() => setSelectedSquare(null));
       },
-      setSelectedSquare: setSelectedSquare,
+      setSelectedSquare,
     }),
-    [gameState, hoveredMove, activeSquares, selectedSquare, showPromotionDialog]
+    [
+      gameState,
+      hoveredMove,
+      activeSquares,
+      selectedSquare,
+      chessGame,
+      showPromotionDialog,
+    ]
   );
 
   return (

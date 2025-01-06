@@ -25,13 +25,13 @@ const ChessboardSquare: React.FC<{ squareString: ChessSquareString }> = ({
   const {
     activePlayer,
     activeSquares,
-    currentPosition,
+    position,
     selectedSquare,
     onActiveSquareClick,
     setSelectedSquare,
   } = useChessGame();
 
-  const value = currentPosition[squareString];
+  const value = position[squareString];
   const player = ChessGame.getSquareValuePlayer(value);
   const isActive = activeSquares.some(
     (activeSquare) => activeSquare === squareString

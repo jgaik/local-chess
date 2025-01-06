@@ -25,7 +25,7 @@ export const ChessHistory: React.FC = () => {
     if (index % 2 === 0) {
       const move: Move = {
         index: Math.floor(index / 2) + 1,
-        white: currentMove.notation!,
+        white: currentMove,
       };
       newAcc.push(move);
     } else {
@@ -33,7 +33,7 @@ export const ChessHistory: React.FC = () => {
         newAcc.at(-1),
         "last move for uneven index"
       );
-      lastMove.black = currentMove.notation!;
+      lastMove.black = currentMove;
     }
     return newAcc;
   }, []);
