@@ -19,7 +19,11 @@ const CHESSBOARD_SQUARES = new Array(64)
       }` as ChessSquareString
   );
 
-const ChessboardSquare: React.FC<{ squareString: ChessSquareString }> = ({
+type ChessboardSquareProps = {
+  squareString: ChessSquareString;
+};
+
+const ChessboardSquare: React.FC<ChessboardSquareProps> = ({
   squareString,
 }) => {
   const {

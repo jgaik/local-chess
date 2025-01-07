@@ -21,6 +21,9 @@ export const PROMOTION_PIECES = [
   "R",
 ] satisfies ChessMove["promotion"][];
 
+export const SAVED_CHESS_GAME_STATE_STORAGE_KEY =
+  "local-chess:chess-game-state";
+
 export const CHESSBOARD_FILES = [
   "a",
   "b",
@@ -58,6 +61,7 @@ export type ChessGameState = {
   availableMoves: Partial<Record<ChessSquareString, ChessMove[]>>;
   position: ChessPosition;
   moves: string[];
+  result: Nullable<ChessPlayer>;
 };
 
 export type SavedChessGameState = {
@@ -181,7 +185,7 @@ export class ChessGame {
     return squareValue === squareValue.toLowerCase() ? "black" : "white";
   }
 
-  constructor(savedGameState?: SavedChessGameState) {
+  constructor(savedGameState: Nullable<SavedChessGameState>) {
     if (savedGameState) {
       this.position = savedGameState.position;
       this.lastMove = savedGameState.lastMove;
@@ -190,11 +194,23 @@ export class ChessGame {
   }
 
   public get gameState(): ChessGameState {
+    let result: ChessGameState["result"] = undefined;
+    const availableMoves = this.availableMoves;
+
+    if (Object.keys(availableMoves).length === 0) {
+      if (this.lastMove?.isCheck) {
+        result = this.inactivePlayer;
+      } else {
+        result = null;
+      }
+    }
+
     return {
       activePlayer: this.activePlayer,
       position: this.position,
-      availableMoves: this.availableMoves,
+      availableMoves,
       moves: this.moveNotations,
+      result,
     };
   }
 

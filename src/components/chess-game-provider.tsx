@@ -2,6 +2,7 @@ import {
   ComponentRef,
   PropsWithChildren,
   useCallback,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -11,15 +12,31 @@ import {
   ChessGameState,
   ChessMove,
   ChessSquareString,
+  SAVED_CHESS_GAME_STATE_STORAGE_KEY,
+  SavedChessGameState,
 } from "../chess-game-service";
 import { ChessGameContextValue, ChessGameContext } from "../contexts";
 import { assertNonNullable } from "@yamori-shared/react-utilities";
 import { ChessPromotionDialog } from "./chess-promotion-dialog";
+import { useDialog } from "@yamori-design/react-components";
 
-export const ChessGameProvider: React.FC<PropsWithChildren> = ({
+type ChessGameProviderProps = PropsWithChildren<{
+  onReset: () => void;
+}>;
+
+export const ChessGameProvider: React.FC<ChessGameProviderProps> = ({
   children,
+  onReset,
 }) => {
-  const chessGame = useMemo(() => new ChessGame(), []);
+  const { showConfirmationDialog } = useDialog();
+
+  const chessGame = useMemo(() => {
+    const savedGameState = localStorage.getItem(
+      SAVED_CHESS_GAME_STATE_STORAGE_KEY
+    );
+
+    return new ChessGame(savedGameState && JSON.parse(savedGameState));
+  }, []);
 
   const dialogRef = useRef<ComponentRef<typeof ChessPromotionDialog>>(null);
   const promotionPromiseResolve =
@@ -52,6 +69,22 @@ export const ChessGameProvider: React.FC<PropsWithChildren> = ({
     });
   }, []);
 
+  const makeMove = useCallback(
+    (move: ChessMove) => {
+      const newState = chessGame.makeMove(move);
+      setGameState(newState);
+      localStorage.setItem(
+        SAVED_CHESS_GAME_STATE_STORAGE_KEY,
+        JSON.stringify({
+          position: newState.position,
+          moves: newState.moves,
+          lastMove: move,
+        } satisfies SavedChessGameState)
+      );
+    },
+    [chessGame]
+  );
+
   const chessGameContextValue = useMemo<ChessGameContextValue>(
     () => ({
       ...gameState,
@@ -59,7 +92,7 @@ export const ChessGameProvider: React.FC<PropsWithChildren> = ({
         ? [hoveredMove.destinationSquare]
         : activeSquares,
       selectedSquare: hoveredMove?.startingSquare ?? selectedSquare,
-      onMoveClick: (move) => setGameState(chessGame.makeMove(move)),
+      onMoveClick: makeMove,
       onMoveHover: setHoveredMove,
       onActiveSquareClick: (destinationSquare) => {
         assertNonNullable(
@@ -82,7 +115,7 @@ export const ChessGameProvider: React.FC<PropsWithChildren> = ({
               )
         )
           .then((move) => {
-            if (move) setGameState(chessGame.makeMove(move));
+            if (move) makeMove(move);
           })
           .finally(() => setSelectedSquare(null));
       },
@@ -93,10 +126,27 @@ export const ChessGameProvider: React.FC<PropsWithChildren> = ({
       hoveredMove,
       activeSquares,
       selectedSquare,
-      chessGame,
+      makeMove,
       showPromotionDialog,
     ]
   );
+
+  useEffect(() => {
+    if (gameState.result === undefined) return;
+
+    showConfirmationDialog(
+      gameState.result
+        ? `Winner: ${gameState.result.toUpperCase()}`
+        : "Game ended with a DRAW",
+      {
+        confirmLabel: "Start new game",
+        withCancel: true,
+      },
+      { closeOnOutsideClick: true }
+    ).then((confirmed) => {
+      if (confirmed) onReset();
+    });
+  }, [gameState.result, onReset, showConfirmationDialog]);
 
   return (
     <ChessGameContext.Provider value={chessGameContextValue}>

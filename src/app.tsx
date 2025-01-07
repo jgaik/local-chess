@@ -1,13 +1,15 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   Chessboard,
   ChessGameProvider,
   ChessHistory,
   ChessMoves,
+  NewChessGameButton,
 } from "./components";
 import "./app.scss";
 import { BemClassNamesCreator } from "@yamori-shared/react-utilities";
-import { Button, NavigationBarLayout } from "@yamori-design/react-components";
+import { NavigationBarLayout } from "@yamori-design/react-components";
+import { SAVED_CHESS_GAME_STATE_STORAGE_KEY } from "./chess-game-service";
 
 export const App: React.FC = () => {
   const [gameId, setGameId] = useState<number>(0);
@@ -18,23 +20,26 @@ export const App: React.FC = () => {
     "button"
   );
 
+  const onReset = useCallback(() => {
+    localStorage.removeItem(SAVED_CHESS_GAME_STATE_STORAGE_KEY);
+    setGameId((prev) => prev + 1);
+  }, []);
+
   return (
     <NavigationBarLayout
       links={[]}
       githubHref="https://github.com/jgaik/local-chess"
     >
       <div className={bemClassNames["app"]}>
-        <ChessGameProvider key={gameId}>
+        <ChessGameProvider key={gameId} onReset={onReset}>
           <Chessboard />
           <div className={bemClassNames["controls"]}>
             <ChessHistory />
             <ChessMoves />
-            <Button
+            <NewChessGameButton
               className={bemClassNames["button"]}
-              onClick={() => setGameId(gameId + 1)}
-            >
-              New game
-            </Button>
+              onReset={onReset}
+            />
           </div>
         </ChessGameProvider>
       </div>

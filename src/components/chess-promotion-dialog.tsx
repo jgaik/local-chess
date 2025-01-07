@@ -1,5 +1,5 @@
 import { Dialog } from "@yamori-design/react-components";
-import { ElementRef, forwardRef } from "react";
+import { Ref } from "react";
 import {
   ChessMove,
   ChessPlayer,
@@ -11,12 +11,14 @@ import "./chess-promotion-dialog.scss";
 type ChessPromotionDialogProps = {
   onPromotion: (promotion: ChessMove["promotion"]) => void;
   activePlayer: ChessPlayer;
+  ref?: Ref<HTMLDialogElement>;
 };
 
-export const ChessPromotionDialog = forwardRef<
-  ElementRef<typeof Dialog>,
-  ChessPromotionDialogProps
->(({ activePlayer, onPromotion }, ref) => (
+export const ChessPromotionDialog: React.FC<ChessPromotionDialogProps> = ({
+  activePlayer,
+  onPromotion,
+  ref,
+}) => (
   <Dialog
     ref={ref}
     onClose={() => onPromotion(undefined)}
@@ -32,4 +34,4 @@ export const ChessPromotionDialog = forwardRef<
       />
     ))}
   </Dialog>
-));
+);

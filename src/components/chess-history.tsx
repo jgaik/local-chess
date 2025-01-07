@@ -40,6 +40,7 @@ export const ChessHistory: React.FC = () => {
 
   return (
     <div className="chess-history">
+      <h6>Moves history</h6>
       {movesList.map((move) => (
         <ChessHistoryMove key={move.index} {...move} />
       ))}

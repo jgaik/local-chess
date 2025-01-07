@@ -3,7 +3,7 @@ import {
   ComponentPropsWithoutRef,
   memo,
   useRef,
-  ElementRef,
+  ComponentRef,
   useMemo,
   useLayoutEffect,
 } from "react";
@@ -26,8 +26,8 @@ export const ChessSquare: React.FC<ChessSquareProps> = memo(function ({
   observeSize,
   ...buttonProps
 }) {
-  const buttonRef = useRef<ElementRef<"button">>(null);
-  const buttonContentRef = useRef<ElementRef<"div">>(null);
+  const buttonRef = useRef<ComponentRef<"button">>(null);
+  const buttonContentRef = useRef<ComponentRef<"div">>(null);
 
   const bemClassNames = useMemo(
     () =>

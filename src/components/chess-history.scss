@@ -1,4 +1,8 @@
 .chess-history {
+  h6 {
+    grid-column: span 3;
+  }
+
   column-gap: var(--yamori-spacing-medium);
   display: grid;
   grid-template-columns: repeat(3, max-content);
