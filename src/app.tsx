@@ -4,20 +4,23 @@ import {
   ChessGameProvider,
   ChessHistory,
   ChessMoves,
-  NewChessGameButton,
 } from "./components";
 import "./app.scss";
 import { BemClassNamesCreator } from "@yamori-shared/react-utilities";
-import { NavigationBarLayout } from "@yamori-design/react-components";
+import {
+  NavigationBarLayout,
+  useDialog,
+} from "@yamori-design/react-components";
 import { SAVED_CHESS_GAME_STATE_STORAGE_KEY } from "./chess-game-service";
 
 export const App: React.FC = () => {
+  const { showConfirmationDialog } = useDialog();
+
   const [gameId, setGameId] = useState<number>(0);
   const bemClassNames = BemClassNamesCreator.create(
     "app",
     undefined,
-    "controls",
-    "button"
+    "controls"
   );
 
   const onReset = useCallback(() => {
@@ -27,7 +30,21 @@ export const App: React.FC = () => {
 
   return (
     <NavigationBarLayout
-      links={[]}
+      links={[
+        {
+          href: "#",
+          onClick: () => {
+            showConfirmationDialog(
+              "This will reset the current board state. Do You want to continue?",
+              { confirmLabel: "Continue", withCancel: true },
+              { closeOnOutsideClick: true }
+            ).then((confirmed) => {
+              if (confirmed) onReset();
+            });
+          },
+          children: "New game",
+        },
+      ]}
       githubHref="https://github.com/jgaik/local-chess"
     >
       <div className={bemClassNames["app"]}>
@@ -36,10 +53,6 @@ export const App: React.FC = () => {
           <div className={bemClassNames["controls"]}>
             <ChessHistory />
             <ChessMoves />
-            <NewChessGameButton
-              className={bemClassNames["button"]}
-              onReset={onReset}
-            />
           </div>
         </ChessGameProvider>
       </div>

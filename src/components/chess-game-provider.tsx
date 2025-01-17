@@ -139,7 +139,7 @@ export const ChessGameProvider: React.FC<ChessGameProviderProps> = ({
         ? `Winner: ${gameState.result.toUpperCase()}`
         : "Game ended with a DRAW",
       {
-        confirmLabel: "Start new game",
+        confirmLabel: "New game",
         withCancel: true,
       },
       { closeOnOutsideClick: true }

@@ -1,6 +1,9 @@
 .chess-history {
   h6 {
+    background-color: var(--yamori-surface-page);
     grid-column: span 3;
+    position: sticky;
+    top: 0;
   }
 
   column-gap: var(--yamori-spacing-medium);

@@ -6,7 +6,7 @@ export const ChessMoves: React.FC = () => {
   const { availableMoves, onMoveClick, onMoveHover } = useChessGame();
 
   return (
-    <Details className="chess-moves" summary="Available Moves">
+    <Details className="chess-moves" summary="Moves">
       <List>
         {Object.values(availableMoves)
           .flat()

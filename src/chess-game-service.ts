@@ -196,10 +196,15 @@ export class ChessGame {
   public get gameState(): ChessGameState {
     let result: ChessGameState["result"] = undefined;
     const availableMoves = this.availableMoves;
+    const moves = this.moveNotations;
 
     if (Object.keys(availableMoves).length === 0) {
       if (this.lastMove?.isCheck) {
         result = this.inactivePlayer;
+        moves[moves.length - 1] = getNonNullable(
+          this.lastMove.notation,
+          "last move notation"
+        ).replace("+", "#");
       } else {
         result = null;
       }
@@ -209,7 +214,7 @@ export class ChessGame {
       activePlayer: this.activePlayer,
       position: this.position,
       availableMoves,
-      moves: this.moveNotations,
+      moves,
       result,
     };
   }
