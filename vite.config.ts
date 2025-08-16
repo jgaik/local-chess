@@ -5,11 +5,4 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   base: "/local-chess/",
   plugins: [react()],
-  css: {
-    preprocessorOptions: {
-      scss: {
-        api: "modern-compiler",
-      },
-    },
-  },
 });
