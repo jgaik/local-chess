@@ -8,6 +8,7 @@ import {
 import "./app.scss";
 import { BemClassNamesCreator } from "@yamori-shared/react-utilities";
 import {
+  Button,
   NavigationBarLayout,
   useDialog,
 } from "@yamori-design/react-components";
@@ -30,10 +31,10 @@ export const App: React.FC = () => {
 
   return (
     <NavigationBarLayout
-      links={[
-        {
-          href: "#",
-          onClick: () => {
+      controls={
+        <Button
+          variant="text"
+          onClick={() => {
             showConfirmationDialog(
               "This will reset the current board state. Do You want to continue?",
               { confirmLabel: "Continue", withCancel: true },
@@ -41,10 +42,11 @@ export const App: React.FC = () => {
             ).then((confirmed) => {
               if (confirmed) onReset();
             });
-          },
-          children: "New game",
-        },
-      ]}
+          }}
+        >
+          New game
+        </Button>
+      }
       githubHref="https://github.com/jgaik/local-chess"
     >
       <div className={bemClassNames["app"]}>
