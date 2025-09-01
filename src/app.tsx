@@ -33,7 +33,6 @@ export const App: React.FC = () => {
     <NavigationBarLayout
       controls={
         <Button
-          variant="text"
           onClick={() => {
             showConfirmationDialog(
               "This will reset the current board state. Do You want to continue?",
